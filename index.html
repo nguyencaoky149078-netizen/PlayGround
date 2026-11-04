@@ -1,0 +1,223 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, viewport-fit=cover" />
+  <meta name="theme-color" content="#07070d" />
+  <meta name="description" content="Jujutsu: Cursed Clash — a cinematic 3D cursed-energy arena brawler." />
+  <title>JUJUTSU: CURSED CLASH</title>
+  <link rel="icon" href="favicon.svg" type="image/svg+xml" />
+  <link rel="preload" href="fonts/BebasNeue.ttf" as="font" type="font/ttf" crossorigin />
+  <link rel="preload" href="fonts/Rajdhani-SemiBold.ttf" as="font" type="font/ttf" crossorigin />
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <canvas id="game-canvas" aria-label="Jujutsu Cursed Clash game"></canvas>
+
+  <div id="film-grain"></div>
+  <div id="vignette"></div>
+  <div id="cinema-bars"><i></i><i></i></div>
+  <div id="damage-overlay"></div>
+  <div id="flash-overlay"></div>
+  <div id="domain-overlay">
+    <div class="domain-text">
+      <span>呪力解放</span>
+      <strong>BLACK<br />FLASH</strong>
+      <em>領域に干渉する一撃</em>
+    </div>
+  </div>
+
+  <div id="loader">
+    <div class="loader-mark">呪</div>
+    <div class="loader-copy">
+      <span>CALIBRATING CURSED ENERGY</span>
+      <div class="loader-line"><i></i></div>
+    </div>
+  </div>
+
+  <!-- ======================= MAIN MENU ======================= -->
+  <section id="menu" class="screen is-visible">
+    <div class="menu-rail left"></div>
+    <div class="menu-rail right"></div>
+    <div class="menu-content">
+      <div class="menu-main">
+        <div class="eyebrow"><span class="pulse-dot"></span> SHIBUYA INCIDENT <b>//</b> 23:47</div>
+        <h1 class="logo">
+          <span class="logo-jp">呪術</span>
+          <span class="logo-main">JUJUTSU</span>
+          <span class="logo-sub">CURSED <i>CLASH</i></span>
+        </h1>
+        <p class="tagline">The veil has fallen. The city is a coffin.<br />Exorcise what crawls inside.</p>
+
+        <div class="menu-actions">
+          <button id="start-btn" class="btn-primary">
+            <span class="btn-kicker">SPECIAL GRADE MISSION</span>
+            <span class="btn-label">ENTER THE VEIL</span>
+            <span class="btn-arrow">→</span>
+          </button>
+          <button id="how-btn" class="btn-ghost">HOW TO PLAY</button>
+        </div>
+
+        <div class="control-strip">
+          <div><kbd>WASD</kbd><span>MOVE</span></div>
+          <div><kbd>LMB</kbd><span>ATTACK</span></div>
+          <div><kbd>RMB</kbd><span>CURSED STRIKE</span></div>
+          <div><kbd>SHIFT</kbd><span>DASH</span></div>
+          <div><kbd>E</kbd><span>BLACK FLASH</span></div>
+        </div>
+      </div>
+
+      <aside class="mission-card">
+        <div class="mission-head"><span>MISSION FILE</span><b>001</b></div>
+        <div class="mission-glyph">祓</div>
+        <h2>THE VEIL PROTOCOL</h2>
+        <p>A curtain has sealed Shibuya. Five waves of cursed spirits stand between you and the source.</p>
+        <ul>
+          <li><span>01</span> Survive the five waves</li>
+          <li><span>02</span> Build cursed energy</li>
+          <li><span>03</span> Land the Black Flash</li>
+          <li><span>04</span> Exorcise the special grade</li>
+        </ul>
+        <div class="mission-footer"><span>THREAT LEVEL</span><b>SPECIAL</b></div>
+      </aside>
+    </div>
+    <div class="menu-bottom">
+      <span>FAN-MADE TRIBUTE • NOT AFFILIATED WITH THE ANIME OR MANGA</span>
+      <span>HEADPHONES RECOMMENDED <i class="headphones">◖</i></span>
+    </div>
+  </section>
+
+  <!-- ======================= HUD ======================= -->
+  <section id="hud" class="hidden">
+    <header class="hud-top">
+      <div class="hud-brand"><span>呪</span><b>JUJUTSU</b><i>CURSED CLASH</i></div>
+      <div class="wave-chip">
+        <span class="wave-kicker">WAVE</span>
+        <span id="wave-num">01</span>
+        <em>/ 05</em>
+        <div class="wave-pip"><i id="wave-fill"></i></div>
+      </div>
+      <div class="score-box">
+        <span>EXORCISM SCORE</span>
+        <b id="score">000000</b>
+      </div>
+    </header>
+
+    <div class="objective-panel">
+      <span class="obj-kicker">CURRENT OBJECTIVE</span>
+      <strong id="objective-title">EXORCISE THE CURSED</strong>
+      <p id="objective-text">Clear the veil. Stay alive.</p>
+    </div>
+
+    <div id="boss-panel" class="boss-panel hidden">
+      <div class="boss-head"><span>SPECIAL GRADE</span><b id="boss-name">THE PATCHWORK CURSE</b></div>
+      <div class="boss-track"><i id="boss-health"></i></div>
+    </div>
+
+    <div class="player-hud">
+      <div class="sigil"><span id="sigil-char">悠</span><i></i></div>
+      <div class="player-bars">
+        <div class="player-name"><b>YUJI ITADORI</b><span>GRADE 1 // SORCERER</span></div>
+        <div class="bar hp"><span class="bar-label">VITALS</span><div class="bar-track"><i id="health-fill"></i></div><b id="health-text">100</b></div>
+        <div class="bar ce"><span class="bar-label">CURSED ENERGY</span><div class="bar-track"><i id="energy-fill"></i></div><b id="energy-text">0</b></div>
+        <div id="ultimate-ready" class="ultimate-ready">BLACK FLASH READY <kbd>E</kbd></div>
+      </div>
+    </div>
+
+    <div class="combo-wrap"><div id="combo" class="combo"><b id="combo-count">0</b><span>HIT COMBO</span><i id="combo-rank">D</i></div></div>
+
+    <div id="kill-feed" class="kill-feed"></div>
+
+    <div class="hud-bottom">
+      <div class="hint-line"><kbd>E</kbd> BLACK FLASH <span>/</span> <kbd>SHIFT</kbd> STEP <span>/</span> <kbd>ESC</kbd> PAUSE</div>
+      <button id="mute-btn" class="icon-btn" aria-label="Toggle sound">SOUND ON</button>
+      <button id="pause-btn" class="icon-btn pause-btn" aria-label="Pause">Ⅱ</button>
+    </div>
+    <div id="reticle" class="reticle"><i></i></div>
+  </section>
+
+  <div id="wave-banner" class="wave-banner">
+    <div class="wb-line"></div>
+    <span id="wb-kicker">WAVE I</span>
+    <strong id="wb-title">THE VEIL THICKENS</strong>
+    <em id="wb-sub">Cursed spirits are converging</em>
+    <div class="wb-line"></div>
+  </div>
+
+  <div id="announcement" class="announcement"><span></span></div>
+
+  <div id="floating-layer"></div>
+
+  <!-- ======================= MOBILE ======================= -->
+  <div id="mobile-controls" class="mobile-controls">
+    <div id="joystick" class="joystick"><div id="joystick-knob" class="knob"><i></i></div><span>MOVE</span></div>
+    <div class="mobile-actions">
+      <button data-action="ultimate" id="m-ultimate" class="m-btn ult">呪<small>FLASH</small></button>
+      <button data-action="dash" class="m-btn dash">STEP</button>
+      <button data-action="heavy" class="m-btn heavy">CURSED</button>
+      <button data-action="attack" class="m-btn attack">STRIKE</button>
+    </div>
+  </div>
+
+  <!-- ======================= PAUSE ======================= -->
+  <section id="pause" class="screen modal-screen">
+    <div class="modal-card">
+      <div class="modal-kicker">VEIL SUSPENDED</div>
+      <h2>PAUSED</h2>
+      <p>The curses are waiting.</p>
+      <button id="resume-btn" class="btn-primary compact"><span class="btn-label">RESUME MISSION</span><span class="btn-arrow">→</span></button>
+      <button id="quit-btn" class="btn-ghost">ABANDON MISSION</button>
+      <div class="pause-controls">
+        <div><kbd>WASD</kbd> MOVE</div><div><kbd>LMB</kbd> COMBO</div><div><kbd>RMB</kbd> HEAVY</div><div><kbd>E</kbd> BLACK FLASH</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ======================= RESULT ======================= -->
+  <section id="result" class="screen modal-screen result-screen">
+    <div class="result-bg"></div>
+    <div class="result-card">
+      <div id="result-kicker" class="modal-kicker">MISSION COMPLETE</div>
+      <h2 id="result-title">VEIL LIFTED</h2>
+      <p id="result-copy">The special grade curse has been exorcised.</p>
+      <div class="grade-wrap">
+        <div class="grade-ring"><span>RANK</span><b id="grade">S</b></div>
+        <div class="result-stats">
+          <div><span>SCORE</span><b id="r-score">0</b></div>
+          <div><span>TIME</span><b id="r-time">00:00</b></div>
+          <div><span>EXORCISED</span><b id="r-kills">0</b></div>
+          <div><span>MAX COMBO</span><b id="r-combo">0</b></div>
+        </div>
+      </div>
+      <div id="r-line" class="result-line">“Throughout heaven and earth, I alone am the honored one.”</div>
+      <button id="retry-btn" class="btn-primary compact"><span class="btn-label">RETURN TO THE VEIL</span><span class="btn-arrow">→</span></button>
+      <button id="menu-btn" class="btn-ghost">MAIN MENU</button>
+    </div>
+  </section>
+
+  <!-- ======================= HOW TO PLAY ======================= -->
+  <section id="how" class="screen modal-screen">
+    <div class="how-card">
+      <div class="modal-kicker">SORCERER FIELD MANUAL</div>
+      <h2>HOW TO EXORCISE</h2>
+      <div class="how-grid">
+        <div><kbd>W A S D</kbd><h3>MOVE</h3><p>Keep moving. Curses telegraph their strikes with a red ring.</p></div>
+        <div><kbd>MOUSE</kbd><h3>AIM</h3><p>Click the arena to capture the camera. Drag also works.</p></div>
+        <div><kbd>LMB / J</kbd><h3>COMBO</h3><p>Chain three strikes. Every landed hit builds cursed energy and combo rank.</p></div>
+        <div><kbd>RMB / K</kbd><h3>CURSED STRIKE</h3><p>A slow, wide blow with huge knockback. Great for breaking a crowd.</p></div>
+        <div><kbd>SHIFT</kbd><h3>STEP</h3><p>Dash through danger. Brief invulnerability window.</p></div>
+        <div><kbd>E</kbd><h3>BLACK FLASH</h3><p>At 100% cursed energy, distort space for a devastating area attack.</p></div>
+      </div>
+      <p class="how-tip">TIP — If the Black Flash aura is ready, save it for the boss. The slow-motion window makes dodging trivial.</p>
+      <button id="how-close" class="btn-primary compact"><span class="btn-label">UNDERSTOOD</span><span class="btn-arrow">→</span></button>
+    </div>
+  </section>
+
+  <div id="rotate-notice"><span>↻</span> ROTATE DEVICE FOR THE FULL EXPERIENCE</div>
+
+  <script type="importmap">
+    { "imports": { "three": "./vendor/three.module.js" } }
+  </script>
+  <script type="module" src="src/main.js"></script>
+</body>
+</html>
